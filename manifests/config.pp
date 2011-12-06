@@ -1,26 +1,147 @@
-## bacula::config
-# Perform some basic config checks on the configuration data when any
-# of the bacula::* classes are called.
-
 class bacula::config {
-  # Check both the Director configuration variables to make sure that it is
-  # a fully-qualified domain name
-  if ($bacula_director_server !~ /^[a-z0-9_-]+(\.[a-z0-9_-]+){2,}$/) {
-    fail("Invalid Bacula Director: $bacula_director_server")
+
+  #If we have a top scope variable defined, use it.
+  #Fall back to a hardcoded value.
+  #
+  #Since the top scope variable could be a string
+  #(if from an ENC), we might need to convert it
+  #to a boolean
+  $manage_console = $::bacula_manage_console ? {
+    undef   => false,
+    default => $::bacula_manage_console,
   }
-  # Do the same for the Storage Daemon configuration variable
-  if ($bacula_storage_server !~ /^[a-z0-9_-]+(\.[a-z0-9_-]+){2,}$/) {
-    fail("Invalid Bacula Storage Daemon: $bacula_storage_server")
-  }
-  # Make sure we have vales for both the Password variables
-  if ($bacula_server_password == "" or $bacula_console_password == "") {
-    fail("Bacula Server Password and/or Console Password is/are not set")
+  if is_string($manage_console) {
+    $safe_manage_console = str2bool($manage_console)
+  } else {
+    $safe_manage_console = $manage_console
   }
 
-  # Set up some default environment variables that are common to all versions
-  # of the classes, first of which is the e-mail address we will send e-mails to
-  $safe_mail_to = $bacula_mail_to ? {
-    /^[\w-]+@([\w-]+\.)+[\w-]+$/ => $bacula_mail_to,
-    default                      => "root@$domain"
+  $is_director = $::bacula_is_director ? {
+    undef   => false, 
+    default => $::bacula_is_director,
   }
+  if is_string($is_director) {
+    $safe_is_director = str2bool($is_director)
+  } else {
+    $safe_is_director = $is_director
+  }
+
+  $is_client = $::bacula_is_client ? {
+    undef   => true,
+    default => $::bacula_is_client,
+  }
+  if is_string($is_client) {
+    $safe_is_client = str2bool($is_client)
+  } else {
+    $safe_is_client = $is_client
+  }
+
+  $is_storage = $::bacula_is_storage ? {
+    undef   => false,
+    default => $::bacula_is_storage,
+  }
+  if is_string($is_storage) {
+    $safe_is_storage = str2bool($is_storage)
+  } else {
+    $safe_is_storage= $is_storage
+  }
+
+  $use_console = $::bacula_use_console ? {
+    undef   => false,
+    default => $::bacula_use_console,
+  }
+  if is_string($use_console) {
+    $safe_use_console = str2bool($use_console)
+  } else {
+    $safe_use_console = $use_console
+  }
+
+  $manage_mysql = $::bacula_manage_mysql ? {
+    undef   => false,
+    default => $::bacula_manage_mysql,
+  }
+  if is_string($manage_mysql) {
+    $safe_manage_mysql = str2bool($manage_mysql)
+  } else {
+    $safe_manage_mysql = $manage_mysql
+  }
+
+  $manage_sqlite = $::bacula_manage_sqlite ? {
+    undef   => false,
+    default => $::bacula_manage_sqlite,
+  }
+  if is_string($manage_sqlite) {
+    $safe_manage_sqlite = str2bool($manage_sqlite)
+  } else {
+    $safe_manage_sqlite = $manage_sqlite
+  }
+
+  $db_backend =  $::bacula_db_backend ? {
+    undef   => 'sqlite',
+    default => $::bacula_db_backend,
+  }
+
+  $mail_to = $::bacula_mail_to ? {
+    undef   => "root@${domain}",
+    default => $::bacula_mail_to,
+  }
+
+  $director_password = $::bacula_director_password ? {
+    undef   => '',
+    default => $::bacula_director_password,
+  }
+
+  $console_password = $::bacula_console_password ? {
+    undef   => '',
+    default => $::bacula_console_password,
+  }
+
+  $director_server = $::bacula_director_server ? {
+    undef   => '',
+    default => $::bacula_director_server,
+  }
+
+  $storage_server = $::bacula_storage_server ? {
+    undef   => '',
+    default => $::bacula_storage_server,
+  }
+
+  $director_package = $::bacula_director_package ? {
+    undef   => 'bacula-director-common',
+    default => $::bacula_director_package,
+  }
+
+  $storage_package = $::bacula_storage_package ? {
+    undef   => 'bacula-storage-common',
+    default => $::bacula_storage_package,
+  }
+
+  $client_package = $::bacula_client_package ? {
+    undef   => 'bacula-client',
+    default => $::bacula_client_package,
+  }
+
+  $director_sqlite_package = $::bacula_director_sqlite_package ? {
+    undef   => 'bacula-director-sqlite3',
+    default => $::bacula_director_sqlite_package,
+  }
+
+  $storage_sqlite_package = $::bacula_storage_sqlite_package ? {
+    undef   => 'bacula-storage-sqlite3',
+    default => $::bacula_storage_sqlite_package,
+  }
+
+  $director_mysql_package = $::bacula_director_mysql_package ? {
+    undef   => 'bacula-director-mysql',
+    default => $::bacula_director_mysql_package,
+  }
+
+  $storage_mysql_package = $::bacula_storage_mysql_package ? {
+    undef   => 'bacula-storage-mysql',
+    default => $::bacula_director_mysql_package,
+  }
+
+  #If it's undef, that's fine
+  $director_template = $::bacula_director_template
+  $storage_template  = $::bacula_storage_template
 }

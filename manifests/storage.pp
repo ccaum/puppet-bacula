@@ -1,16 +1,27 @@
-## bacula::storage
-# Configure the Storage Daemon for Bacula, making sure we build the storage
-# location and import all exported configuration files and directories for
-# this server.
+class bacula::storage(
+    $db_backend,
+    $director_server,
+    $director_password,
+    $storage_server,
+    $storage_package,
+    $mysql_package,
+    $sqlite_package,
+    $console_password,
+    $template = 'bacula/bacula-sd.conf'
+  ) {
 
-class bacula::storage {
-  # Do the configuration checks before we continue
-  require bacula::config
+  $storage_name_array = split($storage_server, '[.]')
+  $director_name_array = split($director_server, '[.]')
+  $storage_name = $storage_name_array[0]
+  $director_name = $director_name_array[0]
 
-  # Make sure the Storage Daemon is installed (with sqlite3)
-  package {
-    ['bacula-sd-sqlite3']:
-      ensure => 'latest';
+  $db_package = $db_backend ? {
+    'mysql'  => $mysql_package,
+    'sqlite' => $sqlite_package,
+  }
+
+  package { [$db_package, $storage_package]:
+    ensure => installed,
   }
 
   # Configure the name and hostname for the Storage Daemon (i.e. this server)
@@ -32,14 +43,14 @@ class bacula::storage {
       ensure  => 'present',
       owner   => 'bacula',
       group   => 'bacula',
-      content => template('bacula/bacula-sd.conf'),
+      content => template($template),
       notify  => Service['bacula-sd'],
-      require => Package['bacula-sd-sqlite3'];
+      require => Package[$db_package];
     '/etc/bacula/bacula-sd.d':
       ensure  => 'directory',
       owner   => 'bacula',
       group   => 'bacula',
-      require => Package['bacula-sd-sqlite3'];
+      require => Package[$db_package];
   # Create an empty while which will make sure that the last line of
   # the bacula-sd.conf file will always run correctly.
     '/etc/bacula/bacula-sd.d/empty.conf':
@@ -60,7 +71,7 @@ class bacula::storage {
     'bacula-sd':
       enable     => true,
       ensure     => running,
-      require    => Package['bacula-sd-sqlite3'],
+      require    => Package[$db_package],
       hasstatus  => true,
       hasrestart => true;
   }

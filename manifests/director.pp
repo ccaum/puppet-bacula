@@ -1,15 +1,32 @@
-## bacula::director
-# Configure the Director for Bacula, making sure that all the client
-# configuration is imported as required for this server.
+class bacula::director(
+    $server,
+    $password,
+    $db_backend,
+    $storage_server,
+    $director_package,
+    $mysql_package,
+    $mail_to,
+    $sqlite_package,
+    $template = 'bacula/bacula-dir.conf',
+    $use_console,
+    $console_password
+  ) {
 
-class bacula::director inherits bacula::config {
+  $storage_name_array = split($storage_server, '[.]')
+  $director_name_array = split($server, '[.]')
+  $storage_name = $storage_name_array[0]
+  $director_name = $director_name_array[0]
 
-  # Make sure the Director is installed (with sqlite3, which will be used for
-  # the storage of the Catalog data). We will also need the File Daemon client
-  # on this server regardless to manage backups of the Catalog
-  package {
-    ['bacula-director-sqlite3', 'bacula-fd']:
-      ensure => 'latest';
+  # Only support mysql or sqlite.
+  # The given backend is validated in the bacula::config::validate class
+  # before this code is reached.
+  $db_package = $db_backend ? {
+    'mysql'  => $mysql_package,
+    'sqlite' => $sqlite_package,
+  }
+  
+  package { [$db_package, $director_package]:
+    ensure => installed,
   }
 
   # Configure the name and the hostname for the Director (i.e. this server)
@@ -36,45 +53,31 @@ class bacula::director inherits bacula::config {
       ensure  => 'present',
       owner   => 'bacula',
       group   => 'bacula',
-      content => template('bacula/bacula-dir.conf'),
-      notify  => Service['bacula-director'],
-      require => Package['bacula-director-sqlite3'];
+      content => template($template),
+      notify  => Service['bacula-dir'],
+      require => Package[$db_package];
     '/etc/bacula/bacula-dir.d':
       ensure  => 'directory',
       owner   => 'bacula',
       group   => 'bacula',
-      require => Package['bacula-director-sqlite3'];
+      require => Package[$db_package];
   # Create an empty while which will make sure that the last line of
   # the bacula-dir.conf file will always run correctly.
-    '/etc/bacula/bacula-dir.d/empty.conf':
-      ensure  => 'present',
+    '/etc/bacula/bacula-dir.d/00-header.conf':
+      ensure  => file,
       owner   => 'bacula',
       group   => 'bacula',
       content => '# DO NOT EDIT - Managed by Puppet - DO NOT REMOVE',
       require => File['/etc/bacula/bacula-dir.d'];
-  # Add in the configuration for the File Daemon (nothing special is needed
-  # for this server, so we'll continue to use the default configuration)
-    '/etc/bacula/bacula-fd.conf':
-      ensure  => 'present',
-      owner   => 'bacula',
-      group   => 'bacula',
-      content => template('bacula/bacula-fd.conf'),
-      notify  => Service['bacula-fd'],
-      require => Package['bacula-fd'];
   }
 
   # Register the Service so we can manage it through Puppet
   service {
-    'bacula-director':
+    'bacula-dir':
       enable     => true,
       ensure     => running,
-      require    => Package['bacula-director-sqlite3'],
+      require    => Package[$db_package],
       hasstatus  => true,
-      hasrestart => true;
-    'bacula-fd':
-      enable     => true,
-      ensure     => running,
-      require    => Package['bacula-fd'],
       hasrestart => true;
   }
 
