@@ -9,6 +9,7 @@ class bacula(
     $director_server         = $bacula::config::bacula_director_server,
     $storage_server          = $bacula::config::bacula_storage_server,
     $manage_console          = $bacula::config::safe_manage_console,
+    $manage_bat              = $bacula::config::safe_manage_bat,
     $manage_mysql            = $bacula::config::safe_manage_mysql,
     $manage_mysql            = $bacula::config::safe_manage_sqlite,
     $director_package        = $bacula::config::director_package,
@@ -39,6 +40,7 @@ class bacula(
     director_server   => $director_server,
     storage_server    => $storage_server,
     manage_console    => $manage_console,
+    manage_bat        => $manage_bat,
     manage_mysql      => $manage_mysql,
     manage_sqlite     => $manage_sqlite,
   }
@@ -104,5 +106,9 @@ class bacula(
       director_server   => $director_server,
       director_password => $director_password,
     }
+  }
+
+  if $manage_bat {
+    class { 'bacula::bat': }
   }
 }

@@ -16,6 +16,17 @@ class bacula::config {
     $safe_manage_console = $manage_console
   }
 
+  $manage_bat = $::bacula_manage_bat ? {
+    undef   => false,
+    default => $::bacula_manage_bat,
+  }
+  if is_string($manage_bat) {
+    $safe_manage_bat = str2bool($manage_bat)
+  } else {
+    $safe_manage_bat = $manage_bat
+  }
+
+
   $is_director = $::bacula_is_director ? {
     undef   => false, 
     default => $::bacula_is_director,
