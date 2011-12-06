@@ -144,4 +144,5 @@ class bacula::config {
   #If it's undef, that's fine
   $director_template = $::bacula_director_template
   $storage_template  = $::bacula_storage_template
+  $console_template  = $::bacula_console_template
 }

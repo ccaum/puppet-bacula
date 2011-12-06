@@ -20,6 +20,7 @@ class bacula(
     $storage_mysql_package   = $bacula::config::storage_mysql_package,
     $director_template       = $bacula::config::director_template,
     $storage_template        = $bacula::config::storage_template,
+    $console_template        = $bacula::config::console_template,
     $use_console             = $bacula::config::safe_use_console,
     $console_password        = $bacula::config::console_password
   ) inherits bacula::config {
@@ -95,6 +96,13 @@ class bacula(
       director_server   => $director_server,
       director_password => $director_password,
       client_package    => $client_package,
+    }
+  }
+
+  if $manage_console {
+    class { 'bacula::console':
+      director_server   => $director_server,
+      director_password => $director_password,
     }
   }
 }
