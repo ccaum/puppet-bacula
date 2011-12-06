@@ -67,26 +67,6 @@ class bacula::config {
     $safe_use_console = $use_console
   }
 
-  $manage_mysql = $::bacula_manage_mysql ? {
-    undef   => false,
-    default => $::bacula_manage_mysql,
-  }
-  if is_string($manage_mysql) {
-    $safe_manage_mysql = str2bool($manage_mysql)
-  } else {
-    $safe_manage_mysql = $manage_mysql
-  }
-
-  $manage_sqlite = $::bacula_manage_sqlite ? {
-    undef   => false,
-    default => $::bacula_manage_sqlite,
-  }
-  if is_string($manage_sqlite) {
-    $safe_manage_sqlite = str2bool($manage_sqlite)
-  } else {
-    $safe_manage_sqlite = $manage_sqlite
-  }
-
   $db_backend =  $::bacula_db_backend ? {
     undef   => 'sqlite',
     default => $::bacula_db_backend,

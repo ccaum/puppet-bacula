@@ -10,8 +10,6 @@ class bacula(
     $storage_server          = $bacula::config::bacula_storage_server,
     $manage_console          = $bacula::config::safe_manage_console,
     $manage_bat              = $bacula::config::safe_manage_bat,
-    $manage_mysql            = $bacula::config::safe_manage_mysql,
-    $manage_mysql            = $bacula::config::safe_manage_sqlite,
     $director_package        = $bacula::config::director_package,
     $storage_package         = $bacula::config::storage_package,
     $client_package          = $bacula::config::client_package,
@@ -41,8 +39,6 @@ class bacula(
     storage_server    => $storage_server,
     manage_console    => $manage_console,
     manage_bat        => $manage_bat,
-    manage_mysql      => $manage_mysql,
-    manage_sqlite     => $manage_sqlite,
   }
 
   if $is_director {
@@ -59,15 +55,6 @@ class bacula(
       use_console      => $use_console,
       console_password => $console_password,
     }
-
-    if $manage_mysql {
-      class { 'bacula::director::mysql': }
-    }
-
-    if $manage_sqlite {
-      class { 'bacula::director::sqlite': }
-    }
-
   }
 
   if $is_storage {
@@ -82,15 +69,6 @@ class bacula(
       console_password  => $console_password,
       template          => $storage_template,
     }
-
-    if $manage_mysql {
-      class { 'bacula::storage::mysql': }
-    }
-
-    if $manage_sqlite {
-      class { 'bacula::storage::sqlite': }
-    }
-
   }
 
   if $is_client {
