@@ -22,6 +22,9 @@ puppet-bacula is distributed in the hope that it will be useful, but WITHOUT ANY
 
 You should have received a copy of the GNU General Public License along with puppet-bacula.  If not, see <http://www.gnu.org/licenses/>.
 
+REQUIREMENTS
+------------
+ * Puppetlabs/stdlib module.  Can be obtained here http://forge.puppetlabs.com/puppetlabs/stdlib or with the command `puppet-module install puppetlabs/stdlib`
 
 TODO
 ----
@@ -40,7 +43,7 @@ There are two steps to the configuration of Bacula using this module:
  1. Configure the Envionment Variables to define what will be backing up and to where, which which passwords and reporting to whom.
  2. Configure the nodes with the required classes to act as the different parts of the network.
 
-The environment variables are as follows:
+The Dashboard (top scope) variables are as follows:
 
 ```ruby
 $bacula_server_password  = "random_password_one_goes_here"
