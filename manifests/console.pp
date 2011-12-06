@@ -25,7 +25,7 @@ class bacula::console {
       ensure  => 'present',
       owner   => 'bacula',
       group   => 'bacula',
-      content => template('bacula/bconsole.conf'),
+      content => template('bacula/bconsole.conf.erb'),
       require => Package['bacula-console'];
   }
 }

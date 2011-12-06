@@ -13,7 +13,7 @@ class bacula::client(
 
   file { '/etc/bacula/bacula-fd.conf':
     ensure  => file,
-    content => template('bacula/bacula-fd.conf'),
+    content => template('bacula/bacula-fd.conf.erb'),
     notify  => Service['bacula-fd'],
   }
 

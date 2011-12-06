@@ -7,7 +7,7 @@ class bacula::storage(
     $mysql_package,
     $sqlite_package,
     $console_password,
-    $template = 'bacula/bacula-sd.conf'
+    $template = 'bacula/bacula-sd.conf.erb'
   ) {
 
   $storage_name_array = split($storage_server, '[.]')
